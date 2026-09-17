@@ -1,700 +1,427 @@
-# 🏗️ PayShield Architecture
+# 🛡️ PayShield — Intelligent Transaction Risk & Payment Management System
 
-> **PayShield — Intelligent Transaction Risk & Payment Management System**
+![Java](https://img.shields.io/badge/Java-Core%20Java-orange)
+![MySQL](https://img.shields.io/badge/Database-MySQL-blue)
+![JDBC](https://img.shields.io/badge/Connectivity-JDBC-red)
+![Status](https://img.shields.io/badge/Status-In%20Development-yellow)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-This document describes the current architecture of PayShield and the planned evolution of the system toward a scalable Spring Boot and AI-powered fraud detection platform.
+PayShield is a transaction risk and payment management system built using **Core Java, JDBC, and MySQL**. The system analyzes transactions using multiple fraud-detection rules, calculates a risk score, generates fraud alerts, and provides a user-to-admin transaction review workflow.
 
----
-
-## 📌 1. Architecture Overview
-
-PayShield currently follows a layered backend architecture using:
-
-- Core Java
-- JDBC
-- DAO pattern
-- Service layer
-- Model classes
-- MySQL
-
-The architecture separates application flow, business logic, database operations and domain models.
-
-```mermaid
-flowchart TB
-
-    MAIN[Main.java]
-
-    USER[User Module]
-    ADMIN[Admin Module]
-
-    SERVICE[FraudDetectionService]
-
-    DAO1[PaymentDAO]
-    DAO2[TransactionReviewDAO]
-    DAO3[FraudRiskScoreDAO]
-    DAO4[FraudAlertDAO]
-    DAO5[DashboardDAO]
-
-    MODEL[Model Layer]
-
-    DB[(MySQL Database)]
-
-    MAIN --> USER
-    MAIN --> ADMIN
-
-    USER --> SERVICE
-    USER --> DAO1
-    USER --> DAO2
-
-    ADMIN --> DAO5
-    ADMIN --> DAO2
-    ADMIN --> DAO4
-
-    SERVICE --> DAO1
-    SERVICE --> DAO3
-    SERVICE --> DAO4
-    SERVICE --> DAO2
-
-    DAO1 --> DB
-    DAO2 --> DB
-    DAO3 --> DB
-    DAO4 --> DB
-    DAO5 --> DB
-
-    SERVICE --> MODEL
-    DAO1 --> MODEL
-    DAO2 --> MODEL
-```
+The project is being developed incrementally, starting with a Core Java and MySQL implementation and gradually evolving toward a **Spring Boot, REST API, secure, scalable, cloud-based and AI-powered fraud detection system**.
 
 ---
 
-# 👤 2. Application Entry Point
+## 📌 Overview
 
-The application starts from:
+Financial applications need to identify suspicious transactions before allowing them to proceed.
 
-```text
-Main.java
-```
+PayShield demonstrates this process by analyzing transaction characteristics such as:
 
-The main application provides separate interaction paths for:
+- Transaction amount
+- Transaction frequency
+- Duplicate transaction patterns
+- Transaction location
+- Previous transaction activity
 
-```text
-                    PayShield
-                       |
-             +---------+---------+
-             |                   |
-             v                   v
-           User                Admin
-             |                   |
-             v                   v
-      Transactions        Dashboard / Reviews
-```
-
-The current implementation uses a command-line interface to demonstrate the backend business workflows.
-
----
-
-# 🧩 3. Application Layers
-
-## 3.1 Application Layer
-
-The application layer is responsible for controlling the overall user and administrator flow.
-
-Main class:
-
-```text
-AI_Powered_Payment_Fraud_Detection_System/
-└── Main.java
-```
-
-Responsibilities include:
-
-- Displaying menus
-- Accepting user input
-- Calling application operations
-- Managing user flow
-- Managing admin flow
-- Displaying transaction and review results
-
----
-
-## 3.2 Service Layer
-
-The service layer contains business logic that should not be tightly coupled to the user interface or direct database operations.
-
-Current service:
-
-```text
-service/
-└── FraudDetectionService.java
-```
-
-The fraud detection service evaluates transaction characteristics and calculates a risk score.
-
-The service acts as the decision-making layer between transaction processing and persistence.
+Based on these indicators, the system calculates a **fraud risk score** and assigns a risk level.
 
 ```text
 Transaction
-     |
-     v
-FraudDetectionService
-     |
-     +----------------------+
-     |                      |
-     v                      v
-Risk Calculation       Risk Classification
-     |                      |
-     +----------+-----------+
-                |
-                v
-        Transaction Decision
+     ↓
+Fraud Detection
+     ↓
+Risk Score
+     ↓
+Risk Classification
+     ↓
+LOW / MEDIUM / HIGH
+     ↓
+Fraud Alert (if required)
+     ↓
+User Explanation
+     ↓
+Admin Review
+     ↓
+Approve / Reject
+     ↓
+User Status
 ```
 
 ---
 
-# 🗄️ 4. DAO Layer
+# ⭐ What Makes PayShield Different?
 
-The Data Access Object layer is responsible for database communication.
+PayShield is designed as more than a simple CRUD application.
 
-Current DAOs:
+It demonstrates a complete transaction-risk workflow:
+
+**Transaction Processing + Fraud Detection + Risk Scoring + Alerts + Manual Review + Decision Tracking**
+
+The project also has a planned evolution path from:
 
 ```text
-dao/
-├── DashboardDAO.java
-├── FraudAlertDAO.java
-├── FraudRiskScoreDAO.java
-├── PaymentDAO.java
-└── TransactionReviewDAO.java
+Core Java
+     ↓
+JDBC + MySQL
+     ↓
+Rule-Based Fraud Detection
+     ↓
+Spring Boot
+     ↓
+REST APIs
+     ↓
+JWT Security
+     ↓
+Redis
+     ↓
+Docker
+     ↓
+AWS
+     ↓
+Microservices
+     ↓
+Machine Learning
 ```
-
-### PaymentDAO
-
-Responsible for payment and transaction-related database operations.
-
-### TransactionReviewDAO
-
-Responsible for transaction review operations, including user review submissions and administrator decisions.
-
-### FraudRiskScoreDAO
-
-Responsible for storing and retrieving transaction risk scores.
-
-### FraudAlertDAO
-
-Responsible for fraud alert records generated for suspicious transactions.
-
-### DashboardDAO
-
-Responsible for retrieving transaction information required by the administrator dashboard.
 
 ---
 
-# 📦 5. Model Layer
+# 📑 Table of Contents
 
-The model layer represents the application's domain objects.
-
-```text
-Model/
-├── DashboardTransaction.java
-├── FraudAlert.java
-├── FraudRiskScore.java
-├── Payment.java
-├── Transaction.java
-└── TransactionReview.java
-```
-
-The model classes represent information such as:
-
-- Transactions
-- Payments
-- Risk scores
-- Fraud alerts
-- Transaction reviews
-- Dashboard transaction data
-
-This keeps domain data separate from application and database logic.
-
----
-
-# 🔌 6. Database Connectivity
-
-Database connectivity is handled through:
-
-```text
-util/
-└── DBConnection.java
-```
-
-The application communicates with MySQL through JDBC.
-
-```text
-Java Application
-       |
-       v
-    JDBC
-       |
-       v
-    MySQL
-```
-
-The database connection configuration is kept separate from the DAO classes so that database access can be reused across the application.
+- [Core Features](#-core-features)
+- [System Workflow](#-system-workflow)
+- [Application Screenshots](#-application-screenshots)
+- [Fraud Detection Engine](#-fraud-detection-engine)
+- [Risk Classification](#-risk-classification)
+- [Transaction Review Workflow](#-transaction-review-workflow)
+- [Application Architecture](#-application-architecture)
+- [Project Structure](#-project-structure)
+- [Database Design](#-database-design)
+- [Technology Stack](#-technology-stack)
+- [Current Implementation](#-current-implementation)
+- [Future Roadmap](#-future-roadmap)
+- [Security Notes](#-security-notes)
+- [Sample Data](#-sample-data)
+- [How to Run](#-how-to-run)
+- [Application Flow](#-application-flow)
+- [Learning Objectives](#-learning-objectives)
+- [Project Evolution](#-project-evolution)
+- [Why This Project](#-why-this-project)
+- [Long-Term Architecture](#-long-term-architecture)
+- [Repository Documentation](#-repository-documentation)
+- [Contributing](#-contributing)
+- [Project Status](#-project-status)
+- [Author](#-author)
+- [License](#-license)
 
 ---
 
-# 🔄 7. Transaction Processing Flow
+# 🚀 Core Features
 
-The transaction lifecycle follows this general flow:
+## 👤 User Features
+
+- Create transactions
+- Enter sender and receiver details
+- Enter transaction amount
+- Select transaction type
+- Enter transaction location
+- Automatically analyze transaction risk
+- View transaction status
+- Submit an explanation for flagged transactions
+- View transaction review results
+- Track approval or rejection status
+
+## 🛡️ Fraud Detection Features
+
+- High transaction amount detection
+- High-frequency transaction detection
+- Duplicate transaction detection
+- Location-based anomaly detection
+- Risk score calculation
+- Risk classification
+- Fraud alert generation
+- Automatic transaction flagging
+
+## 👨‍💼 Admin Features
+
+- View transaction dashboard
+- View pending transaction reviews
+- View fraud-risk information
+- View user explanations
+- Approve suspicious transactions
+- Reject suspicious transactions
+- Monitor transaction review status
+
+## 🗄️ Database Features
+
+- MySQL relational database
+- Foreign key relationships
+- Indexed transaction data
+- Separate fraud risk records
+- Separate fraud alert records
+- Separate transaction review records
+
+---
+
+# 🔄 System Workflow
 
 ```mermaid
 flowchart TD
-
-    A[User Creates Transaction]
-
-    A --> B[Store Transaction]
-
-    B --> C[Fraud Detection Service]
-
+    A[User Creates Transaction] --> B[Store Transaction]
+    B --> C[Fraud Detection Engine]
     C --> D[Calculate Risk Score]
 
     D --> E{Risk Level}
 
     E -->|LOW| F[Process Transaction]
+    E -->|MEDIUM| G[Create Fraud Alert]
+    E -->|HIGH| G
 
-    E -->|MEDIUM| G[Pending Review]
+    G --> H[Transaction Requires Review]
+    H --> I[User Provides Explanation]
+    I --> J[Admin Reviews Transaction]
 
-    E -->|HIGH| H[Pending Review]
+    J --> K{Admin Decision}
 
-    H --> I[Create Fraud Alert]
+    K -->|Approve| L[Transaction Approved]
+    K -->|Reject| M[Transaction Rejected]
 
-    G --> J[User Provides Explanation]
-
-    H --> J
-
-    J --> K[Admin Reviews Transaction]
-
-    K --> L{Admin Decision}
-
-    L -->|Approve| M[Transaction SUCCESS]
-
-    L -->|Reject| N[Transaction REJECTED]
-
-    M --> O[User Checks Status]
-
-    N --> O
+    L --> N[User Checks Status]
+    M --> N
+    F --> N
 ```
 
 ---
 
-# 🔎 8. Fraud Detection Architecture
+# 📸 Application Screenshots
 
-The current fraud detection implementation is **rule-based**.
+The following screenshots show the actual PayShield application workflow.
 
-The system evaluates multiple transaction characteristics.
+## Main Menu
+
+![Main Menu](screenshots/01-main-menu.png)
+
+## User Creates Transaction
+
+![User Transaction](screenshots/02-user-transaction.png)
+
+## Fraud Alert
+
+![Fraud Alert](screenshots/03-fraud-alert.png)
+
+## Admin Dashboard
+
+![Admin Dashboard](screenshots/04-admin-dashboard.png)
+
+## Admin Review
+
+![Admin Review](screenshots/05-admin-review.png)
+
+## User Transaction Status
+
+![User Status](screenshots/06-user-status.png)
+
+---
+
+# 🔍 Fraud Detection Engine
+
+The current PayShield fraud detection engine is **rule-based**.
+
+The main fraud detection logic is implemented in:
 
 ```text
-                 Transaction
-                      |
-                      v
-          +-----------------------+
-          | Fraud Detection       |
-          | Service               |
-          +-----------+-----------+
-                      |
-          +-----------+-----------+
-          |           |           |
-          v           v           v
-       Amount     Frequency    Duplicate
-          |           |           |
-          +-----------+-----------+
-                      |
-                      v
-               Location Check
-                      |
-                      v
-               Risk Calculation
-                      |
-                      v
-                Risk Score
+src/service/FraudDetectionService.java
+```
+
+The system evaluates every transaction against multiple risk indicators.
+
+## Rule 1 — High Transaction Amount
+
+If the transaction amount is greater than ₹10,000:
+
+```text
+Risk Score = +40
+```
+
+## Rule 2 — High Transaction Frequency
+
+If more than 3 previous transactions are detected within a 10-minute window:
+
+```text
+Risk Score = +30
+```
+
+## Rule 3 — Duplicate Transaction
+
+If the same sender, receiver, amount, and transaction type are detected within a 5-minute window:
+
+```text
+Risk Score = +20
+```
+
+## Rule 4 — Different Location
+
+If the transaction location differs from the user's recent transaction location within a 10-minute window:
+
+```text
+Risk Score = +30
 ```
 
 ---
 
-# 📊 9. Risk Calculation
+# 📊 Risk Classification
 
-The current risk score is based on multiple rules.
-
-```text
-Risk Score =
-    Amount Risk
-  + Frequency Risk
-  + Duplicate Risk
-  + Location Risk
-```
-
-The system then classifies the transaction.
-
-```text
-Risk Score
-    |
-    +-------------------+
-    |                   |
-    v                   v
-Risk Classification    Risk Reason
-    |
-    +-------+--------+
-    |       |        |
-    v       v        v
-   LOW   MEDIUM     HIGH
-```
-
----
-
-# 🚨 10. Fraud Detection Rules
-
-## High Transaction Amount
-
-Transactions above the configured threshold contribute additional risk points.
-
-Current threshold:
-
-```text
-₹10,000
-```
-
-Risk contribution:
-
-```text
-+40 points
-```
-
----
-
-## High Transaction Frequency
-
-The system checks recent transaction activity for the sender.
-
-The current implementation evaluates transactions within a defined time window.
-
-If unusually frequent transaction activity is detected:
-
-```text
-+30 points
-```
-
----
-
-## Duplicate Transaction
-
-The system checks for potentially duplicate transactions using transaction characteristics such as:
-
-- Sender
-- Receiver
-- Amount
-- Transaction type
-
-A matching recent transaction contributes:
-
-```text
-+20 points
-```
-
----
-
-## Different Location
-
-The system compares recent transaction locations associated with the sender.
-
-A suspicious location change contributes:
-
-```text
-+30 points
-```
-
----
-
-# 📈 11. Risk Classification
-
-The current classification is:
+The final risk score is converted into a risk level.
 
 | Risk Score | Risk Level |
-|------------|------------|
-| `< 30` | LOW |
-| `30–69` | MEDIUM |
-| `70+` | HIGH |
+|---:|---|
+| `< 30` | 🟢 LOW |
+| `30 – 69` | 🟡 MEDIUM |
+| `70+` | 🔴 HIGH |
 
-The resulting decision is:
+### Example
 
 ```text
-LOW
- |
- +--> Process normally
+Transaction Amount       = ₹15,000
+High Amount              = +40
+High Frequency           = +30
+Different Location       = +30
 
-
-MEDIUM
- |
- +--> PENDING_REVIEW
-       |
-       +--> User explanation
-       |
-       +--> Admin review
-
-
-HIGH
- |
- +--> PENDING_REVIEW
- |
- +--> Fraud Alert
-       |
-       +--> Admin review
+Total Risk Score         = 100
+Risk Level               = HIGH
 ```
+
+Transactions with medium or high risk can be sent through the transaction review workflow.
 
 ---
 
-# 📝 12. Transaction Review Workflow
+# 📝 Transaction Review Workflow
 
-The transaction review workflow is one of the main features of PayShield.
+When a transaction is flagged, the user can provide an explanation which is stored in the database.
 
-When a transaction requires additional verification:
-
-```text
-Transaction
-     |
-     v
-Risk Analysis
-     |
-     v
-MEDIUM / HIGH
-     |
-     v
-PENDING_REVIEW
-     |
-     v
-User Provides Explanation
-     |
-     v
-Admin Reviews
-     |
-     +----------------+
-     |                |
-     v                v
-  APPROVE           REJECT
-     |                |
-     v                v
- SUCCESS           REJECTED
-```
-
----
-
-# 👤 13. User Review Status
-
-After submitting a transaction for review, the user can check its current status.
-
-This prevents the workflow from ending at:
-
-```text
-User → Submit Review
-```
-
-Instead, the user can follow the complete lifecycle:
-
-```text
-Submit Review
-      |
-      v
-PENDING_REVIEW
-      |
-      +----------------+
-      |                |
-      v                v
-  APPROVED          REJECTED
-      |                |
-      v                v
- SUCCESS            REJECTED
-```
-
-This creates a complete feedback loop between the user and administrator.
-
----
-
-# 👨‍💼 14. Admin Review Workflow
-
-The administrator can access transaction and review information.
-
-```text
-Admin
-  |
-  +--> Dashboard
-  |
-  +--> Pending Reviews
-  |
-  +--> Transaction Details
-  |
-  +--> Risk Information
-  |
-  +--> User Explanation
-  |
-  +--> Approve / Reject
-```
-
-When the administrator makes a decision, the transaction and review status are updated in the database.
-
----
-
-# 🚨 15. Fraud Alert Flow
-
-High-risk transactions can generate fraud alerts.
-
-```text
-High-Risk Transaction
-         |
-         v
-   Risk Score >= 70
-         |
-         v
-    Fraud Alert
-         |
-         +--> Transaction ID
-         +--> Risk Score
-         +--> Alert Reason
-         +--> Alert Status
-         +--> Created At
-```
-
-The alert is stored separately from the transaction so that suspicious activity can be tracked independently.
-
----
-
-# 🗃️ 16. Database Architecture
-
-The current database contains four primary tables:
-
-```text
-                     transactions
-                           |
-             +-------------+-------------+
-             |             |             |
-             v             v             v
-     fraud_risk_scores  fraud_alerts  transaction_reviews
-```
-
----
-
-# 🔗 17. Database Relationships
+The administrator can then review the transaction and make a decision.
 
 ```mermaid
-erDiagram
+flowchart LR
+    A[Flagged Transaction] --> B[User Provides Explanation]
+    B --> C[Review Stored in Database]
+    C --> D[Admin Views Pending Review]
+    D --> E{Admin Decision}
 
-    TRANSACTIONS ||--o{ FRAUD_RISK_SCORES : generates
+    E -->|Approve| F[Approved]
+    E -->|Reject| G[Rejected]
 
-    TRANSACTIONS ||--o{ FRAUD_ALERTS : triggers
+    F --> H[User Views Status]
+    G --> H
+```
 
-    TRANSACTIONS ||--o{ TRANSACTION_REVIEWS : receives
+This creates a complete feedback loop:
 
-    TRANSACTIONS {
-        BIGINT transaction_id PK
-        INT sender_id
-        INT receiver_id
-        DECIMAL amount
-        VARCHAR transaction_type
-        VARCHAR transaction_status
-        VARCHAR payment_method
-        VARCHAR location
-        TIMESTAMP transaction_time
-    }
-
-    FRAUD_RISK_SCORES {
-        BIGINT risk_id PK
-        BIGINT transaction_id FK
-        DECIMAL risk_score
-        VARCHAR risk_level
-        TEXT risk_reason
-        VARCHAR detection_method
-        TIMESTAMP created_at
-    }
-
-    FRAUD_ALERTS {
-        BIGINT alert_id PK
-        BIGINT transaction_id FK
-        DECIMAL risk_score
-        TEXT alert_reason
-        VARCHAR alert_status
-        TIMESTAMP created_at
-    }
-
-    TRANSACTION_REVIEWS {
-        BIGINT review_id PK
-        BIGINT transaction_id FK
-        INT user_id
-        DECIMAL risk_score
-        VARCHAR risk_level
-        TEXT risk_reason
-        TEXT user_description
-        VARCHAR review_status
-        TEXT admin_comment
-        TIMESTAMP created_at
-        TIMESTAMP reviewed_at
-    }
+```text
+Flagged Transaction
+        ↓
+User Explanation
+        ↓
+Admin Review
+        ↓
+Approve / Reject
+        ↓
+User Status
 ```
 
 ---
 
-# 🧱 18. Database Query Optimization
+# 🏗️ Application Architecture
 
-Indexes are included for frequently accessed transaction data.
+The current application follows a layered architecture.
 
-For example:
+```mermaid
+flowchart TD
+    UI[Command Line Interface] --> MENU[Main.java]
 
-```sql
-INDEX idx_sender_time
-(sender_id, transaction_time)
+    MENU --> SERVICE[FraudDetectionService]
+
+    SERVICE --> DAO[DAO Layer]
+
+    DAO --> MODEL[Model Layer]
+    DAO --> DB[(MySQL Database)]
+
+    DB --> T[Transactions]
+    DB --> R[Fraud Risk Scores]
+    DB --> A[Fraud Alerts]
+    DB --> V[Transaction Reviews]
 ```
 
-This supports queries that examine recent transaction activity for a particular sender.
-
-Additional indexes are used for:
+## Presentation Layer
 
 ```text
-Transaction Status
-Risk Level
-Review Status
-User ID
-Transaction ID
+Main.java
 ```
 
-The goal is to reduce unnecessary database scanning as transaction volume increases.
+Responsible for:
+
+- User menu
+- Admin menu
+- Input handling
+- Output
+- Application flow
+
+## Service Layer
+
+```text
+FraudDetectionService.java
+```
+
+Responsible for:
+
+- Fraud analysis
+- Risk calculation
+- Risk classification
+- Applying fraud detection rules
+
+## DAO Layer
+
+The DAO layer handles database operations.
+
+```text
+DashboardDAO.java
+FraudAlertDAO.java
+FraudRiskScoreDAO.java
+PaymentDAO.java
+TransactionReviewDAO.java
+```
+
+## Model Layer
+
+The model layer represents application data.
+
+```text
+DashboardTransaction.java
+FraudAlert.java
+FraudRiskScore.java
+Payment.java
+Transaction.java
+TransactionReview.java
+```
+
+## Utility Layer
+
+```text
+DBConnection.java
+```
+
+Responsible for establishing the JDBC connection to MySQL.
 
 ---
 
-# 📁 19. Project Structure
+# 📁 Project Structure
 
 ```text
-PayShield/
+payshield-transaction-risk-system/
 │
-├── src/
-│   │
-│   ├── AI_Powered_Payment_Fraud_Detection_System/
-│   │   └── Main.java
-│   │
-│   ├── dao/
-│   │   ├── DashboardDAO.java
-│   │   ├── FraudAlertDAO.java
-│   │   ├── FraudRiskScoreDAO.java
-│   │   ├── PaymentDAO.java
-│   │   └── TransactionReviewDAO.java
-│   │
-│   ├── Model/
-│   │   ├── DashboardTransaction.java
-│   │   ├── FraudAlert.java
-│   │   ├── FraudRiskScore.java
-│   │   ├── Payment.java
-│   │   ├── Transaction.java
-│   │   └── TransactionReview.java
-│   │
-│   ├── service/
-│   │   └── FraudDetectionService.java
-│   │
-│   └── util/
-│       └── DBConnection.java
+├── .gitignore
+├── LICENSE
+├── README.md
 │
 ├── database/
 │   ├── schema.sql
@@ -704,485 +431,560 @@ PayShield/
 │   └── architecture.md
 │
 ├── screenshots/
-│   └── ...
+│   ├── 01-main-menu.png
+│   ├── 02-user-transaction.png
+│   ├── 03-fraud-alert.png
+│   ├── 04-admin-dashboard.png
+│   ├── 05-admin-review.png
+│   └── 06-user-status.png
 │
-├── README.md
-├── .gitignore
-└── LICENSE
+└── src/
+    ├── Main.java
+    │
+    ├── dao/
+    │   ├── DashboardDAO.java
+    │   ├── FraudAlertDAO.java
+    │   ├── FraudRiskScoreDAO.java
+    │   ├── PaymentDAO.java
+    │   └── TransactionReviewDAO.java
+    │
+    ├── model/
+    │   ├── DashboardTransaction.java
+    │   ├── FraudAlert.java
+    │   ├── FraudRiskScore.java
+    │   ├── Payment.java
+    │   ├── Transaction.java
+    │   └── TransactionReview.java
+    │
+    ├── service/
+    │   └── FraudDetectionService.java
+    │
+    └── util/
+        └── DBConnection.java
 ```
 
 ---
 
-# 💻 20. Current Technology Architecture
+# 🗃️ Database Design
 
-The current implementation is intentionally kept simple so that the core backend concepts can be developed first.
+PayShield currently uses **MySQL** as the relational database.
+
+The main database tables are:
+
+```text
+transactions
+       │
+       ├────────────── fraud_risk_scores
+       │
+       ├────────────── fraud_alerts
+       │
+       └────────────── transaction_reviews
+```
+
+## Transactions
+
+Stores the original transaction information.
+
+Typical information includes:
+
+- Transaction ID
+- Sender
+- Receiver
+- Amount
+- Transaction Type
+- Location
+- Status
+- Created Timestamp
+
+## Fraud Risk Scores
+
+Stores the result of fraud analysis.
+
+Contains:
+
+- Transaction ID
+- Risk Score
+- Risk Level
+- Detection Timestamp
+
+## Fraud Alerts
+
+Stores alerts generated for suspicious transactions.
+
+## Transaction Reviews
+
+Stores:
+
+- Transaction ID
+- User explanation
+- Review status
+- Admin decision
+- Review timestamp
+
+---
+
+# 🧩 Database Relationship
+
+```mermaid
+erDiagram
+    TRANSACTIONS ||--o| FRAUD_RISK_SCORES : has
+    TRANSACTIONS ||--o| FRAUD_ALERTS : generates
+    TRANSACTIONS ||--o| TRANSACTION_REVIEWS : receives
+
+    TRANSACTIONS {
+        int transaction_id PK
+        varchar sender
+        varchar receiver
+        decimal amount
+        varchar transaction_type
+        varchar location
+        varchar status
+        timestamp created_at
+    }
+
+    FRAUD_RISK_SCORES {
+        int risk_id PK
+        int transaction_id FK
+        int risk_score
+        varchar risk_level
+        timestamp created_at
+    }
+
+    FRAUD_ALERTS {
+        int alert_id PK
+        int transaction_id FK
+        varchar alert_type
+        varchar message
+        timestamp created_at
+    }
+
+    TRANSACTION_REVIEWS {
+        int review_id PK
+        int transaction_id FK
+        text explanation
+        varchar review_status
+        timestamp reviewed_at
+    }
+```
+
+---
+
+# 💻 Technology Stack
+
+## Current Implementation
+
+| Technology | Purpose |
+|---|---|
+| Java | Application development |
+| Core Java | Business logic |
+| JDBC | Database connectivity |
+| MySQL | Relational database |
+| Eclipse | Development environment |
+
+## Planned Technologies
+
+| Technology | Planned Purpose |
+|---|---|
+| Spring Boot | Backend application framework |
+| REST API | Client-server communication |
+| JWT | Authentication and authorization |
+| Redis | Caching and high-speed data access |
+| Docker | Containerization |
+| AWS | Cloud deployment |
+| Microservices | Service decomposition |
+| Machine Learning | Intelligent fraud prediction |
+| JUnit | Automated testing |
+
+---
+
+# ✅ Current Implementation
+
+The following features are currently implemented:
+
+- [x] Core Java application
+- [x] JDBC database connectivity
+- [x] MySQL database
+- [x] Transaction creation
+- [x] Transaction status tracking
+- [x] Rule-based fraud detection
+- [x] Risk score calculation
+- [x] Risk classification
+- [x] Fraud alert generation
+- [x] Transaction review workflow
+- [x] User explanation submission
+- [x] Admin dashboard
+- [x] Admin pending review list
+- [x] Admin approval/rejection
+- [x] User review status tracking
+
+---
+
+# 🛣️ Future Roadmap
+
+PayShield is designed to evolve from a Core Java application into a production-style fraud detection backend.
+
+## Phase 1 — Core Java + MySQL
+
+**Completed**
 
 ```text
 Core Java
-    |
-    v
-Business Logic
-    |
-    v
+     ↓
 JDBC
-    |
-    v
+     ↓
 MySQL
+     ↓
+Rule-Based Fraud Detection
 ```
 
-Current technologies:
+## Phase 2 — Spring Boot Backend
 
-| Technology | Role |
-|------------|------|
-| Java | Application development |
-| Core Java | Business logic and OOP |
-| JDBC | Database connectivity |
-| MySQL | Persistent storage |
-| MySQL Workbench | Database development |
-| Eclipse | Development environment |
-
----
-
-# 🔮 21. Planned Spring Boot Architecture
-
-The next major development phase is migration from the current Java application toward a Spring Boot backend.
-
-The planned architecture is:
-
-```mermaid
-flowchart TB
-
-    CLIENT[Client / Frontend]
-
-    API[Spring Boot REST API]
-
-    AUTH[Authentication & Authorization]
-
-    TRANSACTION[Transaction Service]
-
-    FRAUD[Fraud Detection Service]
-
-    REVIEW[Transaction Review Service]
-
-    DB[(MySQL)]
-
-    CACHE[(Redis)]
-
-    CLIENT --> API
-
-    API --> AUTH
-    API --> TRANSACTION
-    API --> REVIEW
-
-    TRANSACTION --> FRAUD
-    TRANSACTION --> DB
-    TRANSACTION --> CACHE
-
-    FRAUD --> DB
-
-    REVIEW --> DB
-```
-
-This architecture is **planned**, not part of the current implementation.
-
----
-
-# 🤖 22. Planned AI Fraud Detection
-
-The current fraud detection system uses deterministic rules.
-
-The planned AI phase will introduce machine-learning-based transaction risk prediction.
-
-Potential features include:
+**Planned**
 
 ```text
-Transaction Amount
-Transaction Frequency
-Payment Method
-Transaction Location
-Duplicate Activity
-Historical Behaviour
-Time-based Patterns
-Transaction Velocity
-```
-
-Planned architecture:
-
-```mermaid
-flowchart LR
-
-    A[Transaction] --> B[Feature Extraction]
-
-    B --> C[ML Model]
-
-    C --> D[Fraud Probability]
-
-    D --> E[Risk Score]
-
-    E --> F{Risk Level}
-
-    F -->|LOW| G[Process]
-    F -->|MEDIUM| H[Manual Review]
-    F -->|HIGH| I[Fraud Alert]
-```
-
-The machine-learning model will eventually complement the existing rule-based system.
-
----
-
-# ⚙️ 23. Planned Backend Evolution
-
-PayShield is being developed through multiple stages.
-
-```text
-                 CURRENT
-                    |
-                    v
-          Core Java + MySQL
-                    |
-                    v
-           JDBC + DAO Layer
-                    |
-                    v
-        Rule-Based Risk Engine
-                    |
-                    v
-        Transaction Review Flow
-                    |
-                    v
-              Spring Boot
-                    |
-                    v
-               REST APIs
-                    |
-                    v
-             JWT Security
-                    |
-                    v
-             Redis + Testing
-                    |
-                    v
-              Docker + AWS
-                    |
-                    v
-           Machine Learning
-                    |
-                    v
-        Intelligent Fraud Detection
-```
-
----
-
-# 🛣️ 24. Development Roadmap
-
-## Phase 1 — Core Backend
-
-- [x] Core Java
-- [x] JDBC
-- [x] MySQL
-- [x] DAO architecture
-- [x] Transaction processing
-- [x] Transaction status tracking
-
-## Phase 2 — Risk Detection
-
-- [x] Rule-based fraud detection
-- [x] Risk scoring
-- [x] Risk classification
-- [x] Fraud alerts
-- [x] Transaction review
-
-## Phase 3 — Review System
-
-- [x] User explanation
-- [x] Admin review
-- [x] Transaction approval
-- [x] Transaction rejection
-- [x] User-side review status
-
-## Phase 4 — Spring Boot
-
-- [ ] Spring Boot migration
-- [ ] REST APIs
-- [ ] DTO layer
-- [ ] Validation
-- [ ] Exception handling
-
-## Phase 5 — Security
-
-- [ ] JWT authentication
-- [ ] Role-based authorization
-- [ ] API security
-- [ ] Secure configuration
-
-## Phase 6 — Performance
-
-- [ ] Redis
-- [ ] Query optimization
-- [ ] Concurrency handling
-- [ ] Transaction management
-- [ ] Automated testing
-
-## Phase 7 — Deployment
-
-- [ ] Docker
-- [ ] AWS deployment
-- [ ] Cloud database
-- [ ] Logging and monitoring
-
-## Phase 8 — AI
-
-- [ ] Feature engineering
-- [ ] Fraud dataset preparation
-- [ ] ML model training
-- [ ] Model evaluation
-- [ ] Model integration
-- [ ] Real-time risk prediction
-
-## Phase 9 — Architecture Evolution
-
-- [ ] Microservices
-- [ ] Fraud Detection Service
-- [ ] Transaction Service
-- [ ] Review Service
-- [ ] Event-driven processing
-
----
-
-# 🎯 25. Design Goals
-
-The architecture is being developed with the following engineering goals:
-
-### Separation of Concerns
-
-Application flow, business logic, database operations and domain models are separated.
-
-### Maintainability
-
-DAO and service components can be modified independently.
-
-### Extensibility
-
-The current rule-based fraud engine can later be extended with machine-learning models.
-
-### Data Consistency
-
-Transaction and review states are persisted in MySQL.
-
-### Performance
-
-Database indexes support frequently used transaction queries.
-
-### Security
-
-Future versions will introduce stronger authentication, authorization and secure configuration.
-
-### Scalability
-
-The planned Spring Boot and microservices architecture is intended to support larger transaction volumes and independent service scaling.
-
----
-
-# 🧠 26. Engineering Concepts Demonstrated
-
-PayShield provides practical implementation experience with:
-
-```text
-Object-Oriented Programming
+Core Java Application
         ↓
-Java Collections & Exception Handling
+Spring Boot
         ↓
-JDBC
-        ↓
-SQL & Relational Databases
-        ↓
-DAO Pattern
+REST APIs
         ↓
 Service Layer
         ↓
-Business Rules
+Repository / DAO Layer
         ↓
-Risk Scoring
-        ↓
-Transaction Workflows
-        ↓
-Fraud Detection
-        ↓
-Backend Architecture
+MySQL
 ```
 
-Future stages will extend this into:
+## Phase 3 — Security
+
+**Planned**
+
+- JWT authentication
+- Role-based authorization
+- Password hashing
+- Secure API endpoints
+- Input validation
+- Centralized exception handling
+
+## Phase 4 — Performance
+
+**Planned**
+
+- Redis caching
+- Faster transaction lookup
+- Real-time risk evaluation
+- Optimized database queries
+
+## Phase 5 — Cloud & Deployment
+
+**Planned**
+
+- Docker
+- AWS
+- Cloud database
+- CI/CD
+- Application monitoring
+- Production deployment
+
+## Phase 6 — Microservices
+
+**Planned**
 
 ```text
-REST APIs
-Security
-Caching
-Testing
-Cloud
-Microservices
-Machine Learning
+API Gateway
+     │
+     ├── User Service
+     ├── Transaction Service
+     ├── Fraud Detection Service
+     ├── Notification Service
+     └── Review Service
+              │
+              ├── MySQL
+              └── Redis
 ```
 
+## Phase 7 — Machine Learning
+
+The current implementation uses a rule-based fraud detection engine.
+
+A future version will introduce machine learning for data-driven fraud prediction.
+
+Potential features:
+
+- Transaction amount
+- Transaction frequency
+- Location changes
+- Transaction time
+- Historical behavior
+- Merchant information
+- Device information
+- Previous fraud patterns
+
+Possible ML workflow:
+
+```text
+Historical Transactions
+        ↓
+Data Preprocessing
+        ↓
+Feature Engineering
+        ↓
+Model Training
+        ↓
+Fraud Prediction
+        ↓
+Risk Probability
+        ↓
+Business Decision
+```
+
+The ML layer can complement the existing rule engine rather than immediately replacing it.
+
 ---
 
-# ⚠️ 27. Current vs Planned Components
+# 🔐 Security Notes
 
-To keep the project technically transparent:
+Do not commit sensitive information to GitHub.
 
-| Component | Current Status |
-|-----------|----------------|
-| Core Java | ✅ Implemented |
-| JDBC | ✅ Implemented |
-| MySQL | ✅ Implemented |
-| DAO Layer | ✅ Implemented |
-| Service Layer | ✅ Implemented |
-| Rule-Based Fraud Detection | ✅ Implemented |
-| Risk Scoring | ✅ Implemented |
-| Fraud Alerts | ✅ Implemented |
-| Transaction Review | ✅ Implemented |
-| Admin Approval/Rejection | ✅ Implemented |
-| User Status Tracking | ✅ Implemented |
-| Spring Boot | 🔜 Planned |
-| REST APIs | 🔜 Planned |
-| JWT | 🔜 Planned |
-| Redis | 🔜 Planned |
-| Docker | 🔜 Planned |
-| AWS | 🔜 Planned |
-| Machine Learning | 🔜 Planned |
-| Microservices | 🔜 Planned |
-
----
-
-# 🔐 28. Security Considerations
-
-No production credentials should be stored in the repository.
-
-The following must remain private:
+Never expose:
 
 ```text
 Database passwords
 API keys
 JWT secrets
 Encryption keys
-Cloud credentials
-Production configuration
+Production credentials
+Private configuration
 ```
 
-Local configuration should be managed outside the public GitHub repository.
+Database credentials should remain local or be supplied through environment variables or local configuration excluded from Git.
+
+Before publishing changes, verify that no real credentials are present in the source code.
 
 ---
 
-# 📌 29. Architecture Principles
+# 🧪 Sample Data
 
-PayShield follows these principles:
+The repository contains SQL scripts that can be used to create the database structure and optional demonstration data.
+
+## Schema
 
 ```text
-                    Clean Separation
-                          |
-              +-----------+-----------+
-              |           |           |
-              v           v           v
-          Business      Data       Models
-           Logic       Access
-              |           |
-              +-----+-----+
-                    |
-                    v
-                 MySQL
+database/schema.sql
 ```
 
-The architecture is intentionally being evolved rather than implementing every technology simultaneously.
-
-This allows each layer to be understood and tested before introducing additional infrastructure.
-
----
-
-# 🚀 30. Long-Term Vision
-
-The long-term objective is to evolve PayShield into an intelligent financial transaction platform capable of:
+Creates:
 
 ```text
-Secure Transaction Processing
-             +
-Real-Time Risk Analysis
-             +
-Automated Fraud Detection
-             +
-Human Review
-             +
-Machine Learning
-             +
-Scalable Backend Infrastructure
+payment_fraud_detection
 ```
 
-The final conceptual architecture is:
+and the required tables.
 
-```mermaid
-flowchart TB
+## Sample Data
 
-    USER[User / Client]
-
-    API[API Gateway]
-
-    AUTH[Authentication Service]
-
-    TX[Transaction Service]
-
-    FRAUD[Fraud Detection Service]
-
-    REVIEW[Review Service]
-
-    ML[Machine Learning Model]
-
-    REDIS[(Redis)]
-
-    MYSQL[(MySQL)]
-
-    CLOUD[AWS Infrastructure]
-
-    USER --> API
-
-    API --> AUTH
-    API --> TX
-    API --> REVIEW
-
-    TX --> FRAUD
-
-    FRAUD --> ML
-    FRAUD --> REDIS
-    FRAUD --> MYSQL
-
-    TX --> MYSQL
-    REVIEW --> MYSQL
-
-    API --> CLOUD
+```text
+database/sample_data.sql
 ```
 
-> **Note:** This represents the long-term architectural direction of PayShield. The current repository implements the Core Java + JDBC + MySQL foundation and rule-based fraud detection workflow.
+Contains demonstration records for testing and presentation.
+
+For a clean development environment:
+
+1. Create the database using `schema.sql`.
+2. Configure the local database connection.
+3. Run the application.
+4. Create transactions through the application.
+
+Use `sample_data.sql` only when you want pre-populated demonstration records.
 
 ---
 
-# 📚 31. Documentation Roadmap
+# ▶️ How to Run
 
-As PayShield evolves, this documentation will be expanded with:
+## Prerequisites
 
-- REST API documentation
-- API request/response examples
-- Database schema documentation
-- Fraud detection rule documentation
-- Machine-learning model documentation
-- Testing strategy
-- Deployment architecture
-- AWS infrastructure
-- Architecture decision records
+Install:
+
+- Java JDK
+- MySQL Server
+- MySQL Workbench
+- Eclipse IDE
+- MySQL JDBC Driver
+
+## Step 1 — Clone the Repository
+
+```text
+https://github.com/sujithakrishna/payshield-transaction-risk-system
+```
+
+## Step 2 — Create the Database
+
+Open MySQL Workbench.
+
+Run:
+
+```text
+database/schema.sql
+```
+
+This creates the required database and tables.
+
+## Step 3 — Configure Database Connection
+
+Open:
+
+```text
+src/util/DBConnection.java
+```
+
+Configure your local MySQL connection.
+
+Example structure:
+
+```java
+String url = "jdbc:mysql://localhost:3306/payment_fraud_detection";
+String username = "root";
+String password = "YOUR_LOCAL_PASSWORD";
+```
+
+Use your own local password.
+
+Do not commit real production credentials.
+
+## Step 4 — Add Sample Data (Optional)
+
+If required, run:
+
+```text
+database/sample_data.sql
+```
+
+This step is optional.
+
+## Step 5 — Run the Application
+
+Open:
+
+```text
+src/Main.java
+```
+
+Run the Java application from Eclipse.
 
 ---
 
-# 🏁 Conclusion
+# 🖥️ Application Flow
 
-PayShield is being developed as a progressive backend engineering project.
+## Main Menu
 
-The current implementation establishes the foundation:
+```text
+1. User
+2. Admin
+0. Exit
+```
+
+## User Menu
+
+```text
+1. Create Transaction
+2. My Transaction Status
+0. Back
+```
+
+## Admin Menu
+
+```text
+1. Dashboard
+2. View Pending Reviews
+3. Process Review
+0. Back
+```
+
+---
+
+# 🔄 Example Transaction Flow
+
+## Normal Transaction
+
+```text
+User
+ ↓
+Create Transaction
+ ↓
+Fraud Analysis
+ ↓
+LOW RISK
+ ↓
+Transaction Processed
+```
+
+## Suspicious Transaction
+
+```text
+User
+ ↓
+Create Transaction
+ ↓
+Fraud Analysis
+ ↓
+HIGH RISK
+ ↓
+Fraud Alert
+ ↓
+Transaction Pending Review
+ ↓
+User Provides Explanation
+ ↓
+Admin Reviews
+ ↓
+Approve / Reject
+ ↓
+User Checks Final Status
+```
+
+---
+
+# 🎯 Learning Objectives
+
+This project demonstrates practical understanding of:
+
+- Object-Oriented Programming
+- Java classes and objects
+- Encapsulation
+- Exception handling
+- Collections
+- JDBC
+- SQL
+- MySQL database design
+- DAO pattern
+- Service-layer architecture
+- Transaction processing
+- Rule-based fraud detection
+- Risk scoring
+- Risk classification
+- CRUD operations
+- Relational database relationships
+- Backend application design
+- Git and GitHub workflow
+
+It also provides a foundation for learning:
+
+- Spring Boot
+- REST APIs
+- Authentication
+- Microservices
+- Cloud deployment
+- Redis
+- Machine Learning
+
+---
+
+# 🔄 Project Evolution
+
+PayShield is being developed incrementally.
+
+## Version 1 — Core Java
 
 ```text
 Core Java
@@ -1190,36 +992,269 @@ Core Java
 JDBC
 +
 MySQL
-+
-DAO Architecture
-+
-Rule-Based Fraud Detection
-+
-Transaction Review Workflow
 ```
 
-The planned evolution introduces:
+## Version 2 — Fraud Detection
+
+```text
+Transaction Processing
++
+Risk Rules
++
+Risk Scoring
++
+Fraud Alerts
+```
+
+## Version 3 — Review Workflow
+
+```text
+User Explanation
++
+Admin Dashboard
++
+Transaction Review
++
+Approval / Rejection
++
+Status Tracking
+```
+
+## Version 4 — Spring Boot
 
 ```text
 Spring Boot
 +
 REST APIs
 +
+Layered Backend
+```
+
+## Version 5 — Secure Backend
+
+```text
 JWT
 +
+Role-Based Access
++
+Password Hashing
++
+Validation
+```
+
+## Version 6 — Scalable Architecture
+
+```text
 Redis
 +
 Docker
 +
 AWS
 +
-Machine Learning
-+
 Microservices
 ```
 
-The goal is to evolve the project from a Java-based transaction management application into a scalable and intelligent financial backend system.
+## Version 7 — AI-Powered Fraud Detection
+
+```text
+Machine Learning
++
+Behavioral Features
++
+Fraud Prediction
++
+Risk Probability
+```
 
 ---
 
-**PayShield — Building secure and intelligent transaction systems, one layer at a time.**
+# 💡 Why This Project?
+
+Fraud detection is a practical backend problem involving:
+
+- High-volume transactions
+- Risk assessment
+- Database operations
+- Business rules
+- Security
+- Real-time decision making
+- Manual review
+- Machine learning
+
+PayShield combines these concepts into a single evolving project.
+
+The initial implementation intentionally focuses on **Core Java and database fundamentals** before introducing more advanced backend and AI technologies.
+
+This demonstrates the progression from:
+
+```text
+Programming Fundamentals
+        ↓
+Backend Development
+        ↓
+Database Engineering
+        ↓
+Fraud Detection
+        ↓
+Secure APIs
+        ↓
+Cloud & Microservices
+        ↓
+AI / Machine Learning
+```
+
+---
+
+# 🏢 Long-Term Architecture
+
+The intended production-style architecture is:
+
+```mermaid
+flowchart TD
+    CLIENT[Web / Mobile Client]
+    GATEWAY[API Gateway]
+
+    USER[User Service]
+    TRANSACTION[Transaction Service]
+    FRAUD[Fraud Detection Service]
+    REVIEW[Review Service]
+    NOTIFICATION[Notification Service]
+
+    REDIS[(Redis)]
+    MYSQL[(MySQL)]
+    ML[ML Fraud Model]
+    AWS[AWS Infrastructure]
+
+    CLIENT --> GATEWAY
+
+    GATEWAY --> USER
+    GATEWAY --> TRANSACTION
+    GATEWAY --> REVIEW
+
+    TRANSACTION --> FRAUD
+    FRAUD --> REDIS
+    FRAUD --> ML
+
+    USER --> MYSQL
+    TRANSACTION --> MYSQL
+    FRAUD --> MYSQL
+    REVIEW --> MYSQL
+
+    REVIEW --> NOTIFICATION
+    NOTIFICATION --> AWS
+```
+
+---
+
+# 📚 Repository Documentation
+
+Additional technical documentation is available in:
+
+```text
+docs/architecture.md
+```
+
+It covers:
+
+- Current architecture
+- Layer responsibilities
+- Fraud detection rules
+- Database relationships
+- Spring Boot architecture roadmap
+- REST API roadmap
+- Security roadmap
+- Redis integration
+- Docker deployment
+- AWS deployment
+- Machine learning integration
+- Microservices roadmap
+
+---
+
+# 🤝 Contributing
+
+This project is primarily a personal portfolio and learning project.
+
+Suggestions, improvements, and technical discussions are welcome.
+
+If you want to contribute:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make your changes.
+4. Test the changes.
+5. Create a pull request.
+
+---
+
+# 📌 Project Status
+
+**🚧 Actively Developing**
+
+## Completed
+
+```text
+Core Java
+JDBC
+MySQL
+Transaction Management
+Rule-Based Fraud Detection
+Risk Scoring
+Fraud Alerts
+Transaction Review
+Admin Dashboard
+Approval / Rejection
+Status Tracking
+```
+
+## Planned
+
+```text
+Spring Boot
+REST APIs
+JWT Authentication
+Redis
+Docker
+AWS
+Microservices
+Machine Learning
+Automated Testing
+```
+
+The project is intentionally being developed step-by-step, starting with a Core Java and MySQL foundation and gradually moving toward an AI-enabled backend system.
+
+---
+
+# 👩‍💻 Author
+
+**Sujitha V K**
+
+Java Backend Developer
+
+Focused on:
+
+- Java
+- Backend Development
+- SQL & Databases
+- Artificial Intelligence
+- Machine Learning
+- FinTech Systems
+
+### Profiles
+
+- GitHub: https://github.com/sujithakrishna
+- LinkedIn: https://www.linkedin.com/in/sujitha-v-k-77a924258/
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+See the [LICENSE](LICENSE) file for details.
+
+---
+
+# ⭐ If You Find This Project Useful
+
+You can star the repository and follow the project as it evolves from a **Core Java transaction management application** into an **AI-powered fraud detection backend system**.
